@@ -1,4 +1,5 @@
+import generator.ConfigReader
+
 fun main() {
-    println("What's your name?")
-    print(AWS().connect())
+    print(ConfigReader.getHumanData())
 }
