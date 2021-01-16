@@ -10,12 +10,8 @@ data class HumanData(
 data class Activity(
     @Json(name = "activity")
     val name: String,
-    @Json(name = "activity_id")
-    val id: Int,
-    val hand: Map<String, SensorData>,
-    val chest: Map<String, SensorData>,
-    val ankle: Map<String, SensorData>
-    )
+    val hand: Map<String, SensorData>
+)
 
 data class SensorData(
     val mean: Double,
@@ -31,4 +27,8 @@ data class SensorData(
     val deriativeChanges: Int,
     val signChanges: Int,
     val total: Int
+)
+
+data class Measurement(
+    val temp: Double
 )

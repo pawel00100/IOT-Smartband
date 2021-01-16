@@ -17,10 +17,12 @@ object ConfigReader {
 
     private fun drawConfigFile(id: Int): String = when (id) {
         0 -> "human101"
+        //1 -> "human1600"
+        //2 -> "human1601"
         else -> "human102"
     }
 
-    fun getHumanData(id: Int = Random.Default.nextInt(2)): HumanData? {
+    fun getHumanData(id: Int = Random.Default.nextInt(4)): HumanData? {
         val resource = "$configPath/${drawConfigFile(id)}.json"
         val configFile = try {
             javaClass.getResource(resource).readText(Charsets.UTF_8)
