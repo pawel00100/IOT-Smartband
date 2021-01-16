@@ -1,6 +1,8 @@
 package generator
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.*
 import kotlin.properties.Delegates
 
@@ -9,9 +11,8 @@ class Generator(private val data: HumanData) {
     private var endTime by Delegates.notNull<Long>()
     private var currentActivity by Delegates.notNull<Activity>()
 
-    init {
-        selectActivity()
-    }
+    val measurementMutex = Mutex()
+    var measurement by Delegates.notNull<Measurement>()
 
     private fun selectActivity() {
         val id = Random().nextInt(data.activities.size)
@@ -29,12 +30,21 @@ class Generator(private val data: HumanData) {
         return Random().nextGaussian() * std + mean
     }
 
-    suspend fun takeMeasure(): Measurement {
+    private suspend fun takeMeasure() {
         if (System.nanoTime() > endTime) selectActivity()
-        delay((1000.0 / data.frequency).toLong())
 
         val params = currentActivity.hand["temp"]!!
         val temp = generateValue(params)
-        return Measurement(temp)
+
+        measurementMutex.withLock {
+            measurement = Measurement(temp)
+        }
+
+        delay((1000.0 / data.frequency).toLong())
+    }
+
+    suspend fun start() {
+        selectActivity()
+        while (true) takeMeasure()
     }
 }

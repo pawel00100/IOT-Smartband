@@ -1,17 +1,21 @@
 import generator.ConfigReader
 import generator.Generator
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.withLock
 
-@ExperimentalCoroutinesApi
 fun main() = runBlocking {
     val humanData = ConfigReader.getHumanData()
     val generator = Generator(humanData!!)
-    val measurements = produce { while (true) send(generator.takeMeasure()) }
-    repeat(10) {
-        println(measurements.receive())
+    coroutineScope {
+        launch { generator.start() }
+        launch {
+            while (true) {
+                delay(100)
+                generator.measurementMutex.withLock {
+                    println(generator.measurement)
+                }
+            }
+        }
     }
-    coroutineContext.cancelChildren()
+    println("Done")
 }
