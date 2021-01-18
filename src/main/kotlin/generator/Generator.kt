@@ -1,50 +1,44 @@
 package generator
 
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.util.*
-import kotlin.properties.Delegates
 
-class Generator(private val data: HumanData) {
-    private var startTime by Delegates.notNull<Long>()
-    private var endTime by Delegates.notNull<Long>()
-    private var currentActivity by Delegates.notNull<Activity>()
+class Generator(private val data: List<Activity>) {
+    private var time: Long = 0
+    private lateinit var currentActivity: Activity
+    private lateinit var sensors: Array<Job>
 
-    val measurementMutex = Mutex()
-    var measurement by Delegates.notNull<Measurement>()
+    val measurement = Measurement()
+    val mutex = Mutex()
 
     private fun selectActivity() {
-        val id = Random().nextInt(data.activities.size)
-        currentActivity = data.activities[id]
+        val id = Random().nextInt(data.size)
+        currentActivity = data[id]
         println(currentActivity.name)
 
-        startTime = System.nanoTime()
         //activities will last for ~15-45 min
-        endTime = startTime + ((Random().nextGaussian() * 15 + 30) * 1e9).toLong()
-    }
-
-    private fun generateValue(params: SensorData): Double {
-        val mean = params.mean
-        val std = params.std
-        return Random().nextGaussian() * std + mean
-    }
-
-    private suspend fun takeMeasure() {
-        if (System.nanoTime() > endTime) selectActivity()
-
-        val params = currentActivity.hand["temp"]!!
-        val temp = generateValue(params)
-
-        measurementMutex.withLock {
-            measurement = Measurement(temp)
-        }
-
-        delay((1000.0 / data.frequency).toLong())
+        time = ((Random().nextGaussian() * 15 + 30) * 60 * 1e3).toLong()
     }
 
     suspend fun start() {
-        selectActivity()
-        while (true) takeMeasure()
+        println("starting generator")
+        while (true) {
+            selectActivity()
+            coroutineScope {
+                sensors = arrayOf(
+                    launch { Sensor(currentActivity.temp, measurement::temp.setter).start() },
+                    launch { Sensor(currentActivity.pulse, measurement::pulse.setter).start() },
+                    launch { Sensor(currentActivity.accelX, measurement::accelX.setter).start() },
+                    launch { Sensor(currentActivity.accelY, measurement::accelY.setter).start() },
+                    launch { Sensor(currentActivity.accelZ, measurement::accelZ.setter).start() }
+                )
+            }
+            delay(time)
+            sensors.forEach { it.cancel() }
+        }
     }
 }

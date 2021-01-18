@@ -1,6 +1,9 @@
 import generator.ConfigReader
 import generator.Generator
-import kotlinx.coroutines.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.withLock
 
 fun main() = runBlocking {
@@ -11,7 +14,7 @@ fun main() = runBlocking {
         launch {
             while (true) {
                 delay(100)
-                generator.measurementMutex.withLock {
+                generator.mutex.withLock {
                     println(generator.measurement)
                 }
             }

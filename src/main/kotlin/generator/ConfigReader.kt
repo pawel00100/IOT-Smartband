@@ -6,7 +6,7 @@ import kotlin.random.Random
 
 object ConfigReader {
 
-    private const val configPath = "../genConfig"
+    private const val configPath = "../generator"
 
     private val renamer = object : FieldRenamer {
         override fun toJson(fieldName: String) = FieldRenamer.camelToUnderscores(fieldName)
@@ -16,19 +16,17 @@ object ConfigReader {
     private val klaxon = Klaxon().fieldRenamer(renamer)
 
     private fun drawConfigFile(id: Int): String = when (id) {
-        0 -> "human101"
-        //1 -> "human1600"
-        //2 -> "human1601"
-        else -> "human102"
+        0 -> "human1"
+        else -> "human2"
     }
 
-    fun getHumanData(id: Int = Random.Default.nextInt(4)): HumanData? {
+    fun getHumanData(id: Int = Random.Default.nextInt(2)): List<Activity>? {
         val resource = "$configPath/${drawConfigFile(id)}.json"
         val configFile = try {
             javaClass.getResource(resource).readText(Charsets.UTF_8)
         } catch (all: Exception) {
             throw RuntimeException("Failed to load resource=$resource!", all)
         }
-        return klaxon.parse(configFile)
+        return klaxon.parseArray(configFile)
     }
 }
