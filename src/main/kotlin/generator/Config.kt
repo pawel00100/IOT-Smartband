@@ -18,10 +18,3 @@ data class SensorData(
     val std: Double
 )
 
-data class Measurement(
-    var temp: Double = 0.0,
-    var pulse: Double = 0.0,
-    var accelX: Double = 0.0,
-    var accelY: Double = 0.0,
-    var accelZ: Double = 0.0
-)

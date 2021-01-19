@@ -30,11 +30,11 @@ class Generator(private val data: List<Activity>) {
             selectActivity()
             coroutineScope {
                 sensors = arrayOf(
-                    launch { Sensor(currentActivity.temp, measurement::temp.setter).start() },
-                    launch { Sensor(currentActivity.pulse, measurement::pulse.setter).start() },
-                    launch { Sensor(currentActivity.accelX, measurement::accelX.setter).start() },
-                    launch { Sensor(currentActivity.accelY, measurement::accelY.setter).start() },
-                    launch { Sensor(currentActivity.accelZ, measurement::accelZ.setter).start() }
+                    launch { Sensor(currentActivity.temp, measurement::temp.setter, mutex).start() },
+                    launch { Sensor(currentActivity.pulse, measurement::pulse.setter, mutex).start() },
+                    launch { Sensor(currentActivity.accelX, measurement::accelX.setter, mutex).start() },
+                    launch { Sensor(currentActivity.accelY, measurement::accelY.setter, mutex).start() },
+                    launch { Sensor(currentActivity.accelZ, measurement::accelZ.setter, mutex).start() }
                 )
             }
             delay(time)

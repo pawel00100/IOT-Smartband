@@ -1,11 +1,14 @@
 package generator
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.*
 
 class Sensor(
     private val data: SensorData,
-    private val setter: (Double) -> Unit
+    private val setter: (Double) -> Unit,
+    private val mutex: Mutex
 ) {
 
     private fun generateValue(params: SensorData): Double {
@@ -17,7 +20,9 @@ class Sensor(
     private suspend fun takeMeasurement() {
         val measurement = generateValue(data)
 
-        setter(measurement)
+        mutex.withLock {
+            setter(measurement)
+        }
 
         delay((1000.0 / data.frequency).toLong())
     }
