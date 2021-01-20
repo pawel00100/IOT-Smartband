@@ -1,8 +1,7 @@
 package generator
 
 import java.util.*
-import kotlin.math.pow
-import kotlin.math.sqrt
+import kotlin.math.abs
 
 
 class Measurement(
@@ -16,23 +15,25 @@ class Measurement(
 
     var accelX: Double = 0.0
         set(value) {
+            if (abs(value - field) > 5 * abs(field) / 4) updateAccel()
             field = value
-            updateAccel()
         }
     var accelY: Double = 0.0
         set(value) {
+            if (abs(value - field) > 5 * abs(field) / 4) updateAccel()
             field = value
-            updateAccel()
         }
     var accelZ: Double = 0.0
         set(value) {
+            if (abs(value - field) > 5 * abs(field) / 4 ) updateAccel()
             field = value
-            updateAccel()
         }
 
     private fun updateAccel() {
-        accelD.offer(sqrt(accelX.pow(2) + accelY.pow(2) + accelZ.pow(2)))
-        if (accelD.size == maxSize) updateSteps()
+        if (accelX != 0.0 && accelY != 0.0 && accelZ != 0.0)
+            accelD.offer(abs(accelX + accelY + accelZ))
+        if (accelD.size == maxSize)
+            updateSteps()
     }
 
     private fun updateSteps() {

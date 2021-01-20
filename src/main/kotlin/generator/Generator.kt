@@ -32,9 +32,9 @@ class Generator(private val data: List<Activity>) {
                 sensors = arrayOf(
                     launch { Sensor(currentActivity.temp, measurement::temp.setter, mutex).start() },
                     launch { Sensor(currentActivity.pulse, measurement::pulse.setter, mutex).start() },
-                    launch { Sensor(currentActivity.accelX, measurement::accelX.setter, mutex).start() },
-                    launch { Sensor(currentActivity.accelY, measurement::accelY.setter, mutex).start() },
-                    launch { Sensor(currentActivity.accelZ, measurement::accelZ.setter, mutex).start() }
+                    launch { AccelSensor(currentActivity.accelX, measurement::accelX.setter, mutex).start() },
+                    launch { AccelSensor(currentActivity.accelY, measurement::accelY.setter, mutex).start() },
+                    launch { AccelSensor(currentActivity.accelZ, measurement::accelZ.setter, mutex).start() }
                 )
             }
             delay(time)

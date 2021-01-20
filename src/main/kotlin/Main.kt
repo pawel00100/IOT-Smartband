@@ -13,12 +13,13 @@ fun main() = runBlocking {
         launch { generator.start() }
         launch {
             while (true) {
-                delay(100)
+                delay(1000)
                 generator.mutex.withLock {
                     println(generator.measurement)
                 }
             }
         }
     }
+
     println("Done")
 }

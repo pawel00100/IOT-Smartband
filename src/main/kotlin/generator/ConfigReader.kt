@@ -2,6 +2,7 @@ package generator
 
 import com.beust.klaxon.FieldRenamer
 import com.beust.klaxon.Klaxon
+import java.io.File
 import kotlin.random.Random
 
 object ConfigReader {
