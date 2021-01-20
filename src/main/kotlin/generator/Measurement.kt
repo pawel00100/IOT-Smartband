@@ -15,17 +15,20 @@ class Measurement(
 
     var accelX: Double = 0.0
         set(value) {
-            if (abs(value - field) > 5 * abs(field) / 4) updateAccel()
+            val delta = abs(value - field)
+            if (delta > abs(field) && delta > 1.2) updateAccel()
             field = value
         }
     var accelY: Double = 0.0
         set(value) {
-            if (abs(value - field) > 5 * abs(field) / 4) updateAccel()
+            val delta = abs(value - field)
+            if (delta > abs(field) && delta > 1.2) updateAccel()
             field = value
         }
     var accelZ: Double = 0.0
         set(value) {
-            if (abs(value - field) > 5 * abs(field) / 4 ) updateAccel()
+            val delta = abs(value - field)
+            if (delta > abs(field) && delta > 1.2) updateAccel()
             field = value
         }
 
