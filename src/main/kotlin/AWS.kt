@@ -7,16 +7,16 @@ class AWS {
         private val random = Random()
     }
 
-    fun connect(){
-        val clientEndpoint = "a377sjyuqggau9-ats.iot.us-east-1.amazonaws.com";
+    fun connect() {
+        val clientEndpoint = "a377sjyuqggau9-ats.iot.us-east-1.amazonaws.com"
         val clientId = random.nextInt(1000000000).toString()
-        val certificateFile = "certificate.pem.crt";
-        val privateKeyFile = "private.pem.key";
+        val certificateFile = "certificate.pem.crt"
+        val privateKeyFile = "private.pem.key"
 
-        val pair = SampleUtil.getKeyStorePasswordPair(certificateFile, privateKeyFile);
+        val pair = SampleUtil.getKeyStorePasswordPair(certificateFile, privateKeyFile)
         val client = AWSIotMqttClient(clientEndpoint, clientId, pair.keyStore, pair.keyPassword)
 
-        client.connect();
+        client.connect()
         println("connected")
         client.publish("/", "hello world")
         println("published")
