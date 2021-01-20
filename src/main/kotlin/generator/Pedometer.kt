@@ -3,11 +3,9 @@ package generator
 import java.util.*
 import kotlin.math.abs
 
-
-class Measurement(
-    var temp: Double = 0.0,
-    var pulse: Double = 0.0,
-    var steps: Int = 0
+class Pedometer(
+    private val measurement: Measurement,
+    private val stepsMod: Double
 ) {
 
     private val maxSize = 10
@@ -16,19 +14,21 @@ class Measurement(
     var accelX: Double = 0.0
         set(value) {
             val delta = abs(value - field)
-            if (delta > abs(field) && delta > 1.2) updateAccel()
+            if (delta > stepsMod * abs(field)) updateAccel()
             field = value
         }
+
     var accelY: Double = 0.0
         set(value) {
             val delta = abs(value - field)
-            if (delta > abs(field) && delta > 1.2) updateAccel()
+            if (delta > stepsMod * abs(field)) updateAccel()
             field = value
         }
+
     var accelZ: Double = 0.0
         set(value) {
             val delta = abs(value - field)
-            if (delta > abs(field) && delta > 1.2) updateAccel()
+            if (delta > stepsMod * abs(field)) updateAccel()
             field = value
         }
 
@@ -40,13 +40,16 @@ class Measurement(
     }
 
     private fun updateSteps() {
-        val p = Array(maxSize) { 0 }
-        for (i in 1 until maxSize - 1) if (accelD[i] > accelD[i - 1] && accelD[i] > accelD[i + 1]) p[i] = 1
-
+        var steps = 0
+        //finding peaks in cached measurements
+        val peaks = Array(maxSize) { false }
+        for (i in 1 until maxSize - 1) if (accelD[i] > accelD[i - 1] && accelD[i] > accelD[i + 1]) peaks[i] = true
+        //check whether peak are separated by at least two measurements
+        //only these will be counted as steps
         var k = 0
         var d: Int
-        for (i in p.indices) {
-            if (p[i] == 1) {
+        for (i in peaks.indices) {
+            if (peaks[i]) {
                 if (k != 0) {
                     d = i - k - 1
                     if (d > 2) steps++
@@ -54,10 +57,11 @@ class Measurement(
                 k = i
             }
         }
+        //if last step was more than two measures before end,
+        //compensate for possible "missed" step
         if (maxSize - k > 2) steps++
         accelD.clear()
+        //mutex is already acquired in AbstractSensor calling accel* setter
+        measurement.steps += steps
     }
-
-    override fun toString(): String = "Measurement(temp=$temp, pulse=$pulse, steps=$steps)"
-
 }

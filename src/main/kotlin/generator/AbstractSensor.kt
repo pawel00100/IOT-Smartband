@@ -5,16 +5,16 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 abstract class AbstractSensor<SD>(
-    private val data: SD,
+    protected val data: SD,
     private val frequency: Double,
     private val setter: (Double) -> Unit,
     private val mutex: Mutex
 ) {
 
-    protected abstract fun generateValue(params: SD): Double
+    protected abstract fun generateValue(): Double
 
     private suspend fun takeMeasurement() {
-        val measurement = generateValue(data)
+        val measurement = generateValue()
 
         mutex.withLock {
             setter(measurement)

@@ -9,9 +9,9 @@ class Sensor(
     mutex: Mutex
 ) : AbstractSensor<SensorData>(data, data.frequency, setter, mutex) {
 
-    override fun generateValue(params: SensorData): Double {
-        val mean = params.mean
-        val std = params.std
+    override fun generateValue(): Double {
+        val mean = data.mean
+        val std = data.std
         return Random().nextGaussian() * std + mean
     }
 }

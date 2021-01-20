@@ -4,37 +4,41 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
 import java.util.*
 
 class Generator(private val data: List<Activity>) {
     private var time: Long = 0
-    private lateinit var currentActivity: Activity
+    private lateinit var activity: Activity
+    private lateinit var pedometer: Pedometer
     private lateinit var sensors: Array<Job>
 
     val measurement = Measurement()
-    val mutex = Mutex()
 
-    private fun selectActivity() {
-        val id = Random().nextInt(data.size)
-        currentActivity = data[id]
-        println(currentActivity.name)
+    private fun selectActivity(activityId: Int?) {
+        val id = activityId ?: Random().nextInt(data.size)
+        activity = data[id]
+        println(activity.name)
 
+        pedometer = Pedometer(
+            measurement,
+            activity.stepsMod
+        )
         //activities will last for ~15-45 min
         time = ((Random().nextGaussian() * 15 + 30) * 60 * 1e3).toLong()
     }
 
-    suspend fun start() {
+    suspend fun start(activityId: Int? = null) {
         println("starting generator")
+        val mutex = measurement.mutex
         while (true) {
-            selectActivity()
+            selectActivity(activityId)
             coroutineScope {
                 sensors = arrayOf(
-                    launch { Sensor(currentActivity.temp, measurement::temp.setter, mutex).start() },
-                    launch { Sensor(currentActivity.pulse, measurement::pulse.setter, mutex).start() },
-                    launch { AccelSensor(currentActivity.accelX, measurement::accelX.setter, mutex).start() },
-                    launch { AccelSensor(currentActivity.accelY, measurement::accelY.setter, mutex).start() },
-                    launch { AccelSensor(currentActivity.accelZ, measurement::accelZ.setter, mutex).start() }
+                    launch { Sensor(activity.temp, measurement::temp.setter, mutex).start() },
+                    launch { Sensor(activity.pulse, measurement::pulse.setter, mutex).start() },
+                    launch { AccelSensor(activity.accelX, pedometer::accelX.setter, mutex).start() },
+                    launch { AccelSensor(activity.accelY, pedometer::accelY.setter, mutex).start() },
+                    launch { AccelSensor(activity.accelZ, pedometer::accelZ.setter, mutex).start() }
                 )
             }
             delay(time)

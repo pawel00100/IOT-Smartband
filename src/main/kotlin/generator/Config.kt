@@ -1,10 +1,12 @@
 package generator
 
 import com.beust.klaxon.Json
+import kotlinx.coroutines.sync.Mutex
 
 data class Activity(
     @Json(name = "activity")
     val name: String,
+    val stepsMod: Double,
     val temp: SensorData,
     val pulse: SensorData,
     val accelX: AccelSensorData,
@@ -29,3 +31,11 @@ data class AccelSensorData(
 )
 
 
+data class Measurement(
+    var temp: Double = 0.0,
+    var pulse: Double = 0.0,
+    var steps: Int = 0
+) {
+    @Json(ignored = true)
+    val mutex = Mutex()
+}

@@ -13,27 +13,27 @@ class AccelSensor(
     private val upperEnd: Double = data.mean + data.std
     private val lowerEnd: Double = data.mean - data.std
 
-    override fun generateValue(params: AccelSensorData): Double {
+    override fun generateValue(): Double {
         val mean: Double
         val std: Double
         if (previousValue == 0.0) {
-            mean = params.mean
-            std = params.std
+            mean = data.mean
+            std = data.std
         } else when {
             previousValue < lowerEnd -> {
-                mean = params.incMean
-                std = params.incStd
+                mean = data.incMean
+                std = data.incStd
             }
             previousValue > upperEnd -> {
-                mean = params.decMean
-                std = params.decStd
+                mean = data.decMean
+                std = data.decStd
             }
             else -> if (Random.Default.nextBoolean()) {
-                mean = params.incMean
-                std = params.incStd
+                mean = data.incMean
+                std = data.incStd
             } else {
-                mean = params.decMean
-                std = params.decStd
+                mean = data.decMean
+                std = data.decStd
             }
         }
 
