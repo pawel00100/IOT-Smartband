@@ -5,6 +5,10 @@ import com.beust.klaxon.Klaxon
 import java.io.File
 import kotlin.random.Random
 
+/**
+ * Object reading and writing .json config files. Uses [Klaxon] for parsing to
+ * and from .json
+ */
 object ConfigReader {
 
     private const val configPath = "../generator"
@@ -22,6 +26,10 @@ object ConfigReader {
         else -> "human2"
     }
 
+    /**
+     * Tries to read list of [Activity] objects from .json file
+     * @param id index of config file to load, default random
+     */
     fun getHumanData(id: Int = Random.Default.nextInt(2)): List<Activity>? {
         val resource = "$configPath/${drawConfigFile(id)}.json"
         val configFile = try {
@@ -32,6 +40,10 @@ object ConfigReader {
         return klaxon.parseArray(configFile)
     }
 
+    /**
+     * Overwrites file "measurement.json" with values from [measurement]
+     * @param measurement values to save
+     */
     fun saveMeasurement(measurement: Measurement) {
         val jsonString = klaxon.toJsonString(measurement)
         File(savePath).apply {

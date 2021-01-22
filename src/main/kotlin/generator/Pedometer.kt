@@ -4,6 +4,18 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.reflect.KProperty
 
+
+/**
+ * Class implementing step counting algorithm. Uses data from accelerometer
+ * do estimate number of steps.
+ *
+ * @param measurement object collecting results
+ * @param stepsMod parameter controlling sensitivity of filter
+ *
+ * @property accelX value of acceleration on axis X
+ * @property accelY value of acceleration on axis Y
+ * @property accelZ value of acceleration on axis Z
+ */
 class Pedometer(
     private val measurement: Measurement,
     private val stepsMod: Double

@@ -9,6 +9,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 
+/**
+ * Class in control of coroutines imitating sensors
+ *
+ * @param data list of activities containing parameters for sensors
+ * @property measurement object containing generated values
+ */
 class Generator(private val data: List<Activity>) {
     private var time: Long = 0
     private lateinit var activity: Activity
@@ -30,6 +36,11 @@ class Generator(private val data: List<Activity>) {
         time = ((Random().nextGaussian() * 15 + 30) * 60 * 1e3).toLong()
     }
 
+    /**
+     * Each 15-45 min chooses activity [data] and starts coroutines
+     * imitating temperature, pulse and accelerometer sensors
+     * @param activityId optional index of activity to chose
+     */
     suspend fun start(activityId: Int? = null) {
         println("starting generator")
         val mutex = measurement.mutex
