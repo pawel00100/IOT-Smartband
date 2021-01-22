@@ -2,6 +2,7 @@ package generator
 
 import java.util.*
 import kotlin.math.abs
+import kotlin.reflect.KProperty
 
 class Pedometer(
     private val measurement: Measurement,
@@ -11,26 +12,9 @@ class Pedometer(
     private val maxSize = 10
     private val accelD = LinkedList<Double>()
 
-    var accelX: Double = 0.0
-        set(value) {
-            val delta = abs(value - field)
-            if (delta > stepsMod * abs(field)) updateAccel()
-            field = value
-        }
-
-    var accelY: Double = 0.0
-        set(value) {
-            val delta = abs(value - field)
-            if (delta > stepsMod * abs(field)) updateAccel()
-            field = value
-        }
-
-    var accelZ: Double = 0.0
-        set(value) {
-            val delta = abs(value - field)
-            if (delta > stepsMod * abs(field)) updateAccel()
-            field = value
-        }
+    var accelX: Double by AxisFilter()
+    var accelY: Double by AxisFilter()
+    var accelZ: Double by AxisFilter()
 
     private fun updateAccel() {
         if (accelX != 0.0 && accelY != 0.0 && accelZ != 0.0)
@@ -63,5 +47,14 @@ class Pedometer(
         accelD.clear()
         //mutex is already acquired in AbstractSensor calling accel* setter
         measurement.steps += steps
+    }
+
+    private class AxisFilter(private var accel: Double = 0.0) {
+        operator fun getValue(thisRef: Pedometer, property: KProperty<*>): Double = accel
+        operator fun setValue(thisRef: Pedometer, property: KProperty<*>, value: Double) {
+            val delta = abs(value - accel)
+            if (delta > thisRef.stepsMod * abs(accel)) thisRef.updateAccel()
+            accel = value
+        }
     }
 }
