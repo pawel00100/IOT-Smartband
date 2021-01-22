@@ -1,5 +1,8 @@
 package generator
 
+import generator.sensor.AccelSensor
+import generator.sensor.NormalSensor
+import generator.sensor.Sensor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -34,11 +37,11 @@ class Generator(private val data: List<Activity>) {
             selectActivity(activityId)
             coroutineScope {
                 sensors = arrayOf(
-                    launch { Sensor(activity.temp, measurement::temp.setter, mutex).start() },
-                    launch { Sensor(activity.pulse, measurement::pulse.setter, mutex).start() },
-                    launch { AccelSensor(activity.accelX, pedometer::accelX.setter, mutex).start() },
-                    launch { AccelSensor(activity.accelY, pedometer::accelY.setter, mutex).start() },
-                    launch { AccelSensor(activity.accelZ, pedometer::accelZ.setter, mutex).start() }
+                    launch { Sensor(NormalSensor(activity.temp), measurement::temp.setter, mutex).start() },
+                    launch { Sensor(NormalSensor(activity.pulse), measurement::pulse.setter, mutex).start() },
+                    launch { Sensor(AccelSensor(activity.accelX), pedometer::accelX.setter, mutex).start() },
+                    launch { Sensor(AccelSensor(activity.accelY), pedometer::accelY.setter, mutex).start() },
+                    launch { Sensor(AccelSensor(activity.accelZ), pedometer::accelZ.setter, mutex).start() }
                 )
             }
             delay(time)

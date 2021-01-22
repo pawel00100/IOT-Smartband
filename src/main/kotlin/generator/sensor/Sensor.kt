@@ -1,17 +1,14 @@
-package generator
+package generator.sensor
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-abstract class AbstractSensor<SD>(
-    protected val data: SD,
-    private val frequency: Double,
+class Sensor(
+    gen: ISensor,
     private val setter: (Double) -> Unit,
     private val mutex: Mutex
-) {
-
-    protected abstract fun generateValue(): Double
+) : ISensor by gen {
 
     private suspend fun takeMeasurement() {
         val measurement = generateValue()

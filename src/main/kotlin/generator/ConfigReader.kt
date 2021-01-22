@@ -8,6 +8,7 @@ import kotlin.random.Random
 object ConfigReader {
 
     private const val configPath = "../generator"
+    private const val savePath = "measurement.json"
 
     private val renamer = object : FieldRenamer {
         override fun toJson(fieldName: String) = FieldRenamer.camelToUnderscores(fieldName)
@@ -29,5 +30,14 @@ object ConfigReader {
             throw RuntimeException("Failed to load resource=$resource!", all)
         }
         return klaxon.parseArray(configFile)
+    }
+
+    fun saveMeasurement(measurement: Measurement) {
+        val jsonString = klaxon.toJsonString(measurement)
+        File(savePath).apply {
+            createNewFile()
+        }.also {
+            it.writeText(jsonString)
+        }
     }
 }
