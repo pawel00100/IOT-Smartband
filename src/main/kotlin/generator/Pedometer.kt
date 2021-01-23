@@ -2,7 +2,20 @@ package generator
 
 import java.util.*
 import kotlin.math.abs
+import kotlin.reflect.KProperty
 
+
+/**
+ * Class implementing step counting algorithm. Uses data from accelerometer
+ * do estimate number of steps.
+ *
+ * @param measurement object collecting results
+ * @param stepsMod parameter controlling sensitivity of filter
+ *
+ * @property accelX value of acceleration on axis X
+ * @property accelY value of acceleration on axis Y
+ * @property accelZ value of acceleration on axis Z
+ */
 class Pedometer(
     private val measurement: Measurement,
     private val stepsMod: Double
@@ -11,26 +24,9 @@ class Pedometer(
     private val maxSize = 10
     private val accelD = LinkedList<Double>()
 
-    var accelX: Double = 0.0
-        set(value) {
-            val delta = abs(value - field)
-            if (delta > stepsMod * abs(field)) updateAccel()
-            field = value
-        }
-
-    var accelY: Double = 0.0
-        set(value) {
-            val delta = abs(value - field)
-            if (delta > stepsMod * abs(field)) updateAccel()
-            field = value
-        }
-
-    var accelZ: Double = 0.0
-        set(value) {
-            val delta = abs(value - field)
-            if (delta > stepsMod * abs(field)) updateAccel()
-            field = value
-        }
+    var accelX: Double by AxisFilter()
+    var accelY: Double by AxisFilter()
+    var accelZ: Double by AxisFilter()
 
     private fun updateAccel() {
         if (accelX != 0.0 && accelY != 0.0 && accelZ != 0.0)
@@ -63,5 +59,14 @@ class Pedometer(
         accelD.clear()
         //mutex is already acquired in AbstractSensor calling accel* setter
         measurement.steps += steps
+    }
+
+    private class AxisFilter(private var accel: Double = 0.0) {
+        operator fun getValue(thisRef: Pedometer, property: KProperty<*>): Double = accel
+        operator fun setValue(thisRef: Pedometer, property: KProperty<*>, value: Double) {
+            val delta = abs(value - accel)
+            if (delta > thisRef.stepsMod * abs(accel)) thisRef.updateAccel()
+            accel = value
+        }
     }
 }

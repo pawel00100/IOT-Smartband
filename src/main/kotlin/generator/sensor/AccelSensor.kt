@@ -1,13 +1,14 @@
-package generator
+package generator.sensor
 
-import kotlinx.coroutines.sync.Mutex
+import generator.AccelSensorData
 import kotlin.random.Random
 
 class AccelSensor(
-    data: AccelSensorData,
-    setter: (Double) -> Unit,
-    mutex: Mutex
-) : AbstractSensor<AccelSensorData>(data, data.frequency, setter, mutex) {
+    private val data: AccelSensorData
+) : ISensor {
+
+    override val frequency: Double
+        get() = data.frequency
 
     private var previousValue: Double = 0.0
     private val upperEnd: Double = data.mean + data.std
