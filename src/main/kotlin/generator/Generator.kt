@@ -63,9 +63,9 @@ class Generator(private val data: List<Activity>) {
                     launch { Sensor(AccelSensor(activity.accelY), pedometer::accelY.setter, mutex).start() },
                     launch { Sensor(AccelSensor(activity.accelZ), pedometer::accelZ.setter, mutex).start() }
                 )
+                delay(time)
+                sensors.forEach { it.cancel() }
             }
-            delay(time)
-            sensors.forEach { it.cancel() }
         }
     }
 }
