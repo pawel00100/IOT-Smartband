@@ -23,6 +23,15 @@ class Generator(private val data: List<Activity>) {
 
     val measurement = Measurement()
 
+    private fun activityTime(name: String): Long = when (name) {
+        "lying" -> //~5-9 hours
+            (Random().nextGaussian() * 120 + 7 * 60) * 60 * 1e3
+        "walking", "running", "nordic_walking" -> //~40-100 min
+            (Random().nextGaussian() * 20 + 60) * 60 * 1e3
+        else -> // ~15-45 min
+            (Random().nextGaussian() * 15 + 30) * 60 * 1e3
+    }.toLong()
+
     private fun selectActivity(activityId: Int?) {
         val id = activityId ?: Random().nextInt(data.size)
         activity = data[id]
@@ -32,12 +41,12 @@ class Generator(private val data: List<Activity>) {
             measurement,
             activity.stepsMod
         )
-        //activities will last for ~15-45 min
-        time = ((Random().nextGaussian() * 15 + 30) * 60 * 1e3).toLong()
+
+        time = activityTime(activity.name)
     }
 
     /**
-     * Each 15-45 min chooses activity [data] and starts coroutines
+     * Chooses activity from [data] and starts coroutines
      * imitating temperature, pulse and accelerometer sensors
      * @param activityId optional index of activity to chose
      */
