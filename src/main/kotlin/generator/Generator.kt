@@ -26,7 +26,7 @@ class Generator(private val data: List<Activity>) {
     private fun activityTime(name: String): Long = when (name) {
         "lying" -> //~5-9 hours
             (Random().nextGaussian() * 120 + 7 * 60) * 60 * 1e3
-        "walking", "running", "nordic_walking" -> //~40-100 min
+        "walking", "cycling", "nordic_walking" -> //~40-100 min
             (Random().nextGaussian() * 20 + 60) * 60 * 1e3
         else -> // ~15-45 min
             (Random().nextGaussian() * 15 + 30) * 60 * 1e3
@@ -63,9 +63,9 @@ class Generator(private val data: List<Activity>) {
                     launch { Sensor(AccelSensor(activity.accelY), pedometer::accelY.setter, mutex).start() },
                     launch { Sensor(AccelSensor(activity.accelZ), pedometer::accelZ.setter, mutex).start() }
                 )
+                delay(time)
+                sensors.forEach { it.cancel() }
             }
-            delay(time)
-            sensors.forEach { it.cancel() }
         }
     }
 }

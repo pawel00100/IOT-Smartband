@@ -10,7 +10,7 @@ fun main() = runBlocking {
     var generatorJob: Job
     var printlnJob: Job
     coroutineScope {
-        generatorJob = launch { generator.start(4) }
+        generatorJob = launch { generator.start() }
         printlnJob = launch {
             while (true) {
                 delay(1000)
@@ -20,7 +20,7 @@ fun main() = runBlocking {
                 }
             }
         }
-        delay(20000)
+        delay(60000)
         printlnJob.cancelAndJoin()
         generatorJob.cancelAndJoin()
     }

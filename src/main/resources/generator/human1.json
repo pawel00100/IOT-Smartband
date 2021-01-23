@@ -28,7 +28,7 @@
       "std": 5.586439693188697
     },
     "activity": "lying",
-    "steps_mod": 0.25,
+    "steps_mod": 0.3,
     "pulse": {
       "frequency": 0.1,
       "mean": 60.6,
@@ -69,7 +69,7 @@
       "std": 1.9767651450886594
     },
     "activity": "sitting",
-    "steps_mod": 4.8,
+    "steps_mod": 4.85,
     "pulse": {
       "frequency": 0.1,
       "mean": 67.91,
@@ -110,7 +110,7 @@
       "std": 1.4942841869956724
     },
     "activity": "standing",
-    "steps_mod": 3,
+    "steps_mod": 3.05,
     "pulse": {
       "frequency": 0.1,
       "mean": 74.94,
@@ -151,7 +151,7 @@
       "std": 2.2534477660035614
     },
     "activity": "walking",
-    "steps_mod": 1.2,
+    "steps_mod": 1.25,
     "pulse": {
       "frequency": 0.1,
       "mean": 106.06,
@@ -192,7 +192,7 @@
       "std": 2.2527412434204694
     },
     "activity": "running",
-    "steps_mod": 0.75,
+    "steps_mod": 0.8,
     "pulse": {
       "frequency": 0.1,
       "mean": 149.59,
@@ -233,7 +233,7 @@
       "std": 2.1951853978449227
     },
     "activity": "cycling",
-    "steps_mod": 1.02,
+    "steps_mod": 1.07,
     "pulse": {
       "frequency": 0.1,
       "mean": 149.59,
@@ -274,7 +274,7 @@
       "std": 4.32951118568902
     },
     "activity": "nordic_walking",
-    "steps_mod": 1.28,
+    "steps_mod": 1.33,
     "pulse": {
       "frequency": 0.1,
       "mean": 106.06,
