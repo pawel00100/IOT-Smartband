@@ -52,4 +52,9 @@ object ConfigReader {
             it.writeText(jsonString)
         }
     }
+
+    fun serialize(measurement: Measurement): String {
+        return klaxon.toJsonString(measurement)
+
+    }
 }

@@ -3,24 +3,38 @@ import sampleUtil.SampleUtil
 import java.util.*
 
 class AWS {
-    companion object {
-        private val random = Random()
-    }
-
-    fun connect() {
-        val clientEndpoint = "a377sjyuqggau9-ats.iot.us-east-1.amazonaws.com"
-        val clientId = random.nextInt(1000000000).toString()
-        val certificateFile = "certificate.pem.crt"
-        val privateKeyFile = "private.pem.key"
-
-        val pair = SampleUtil.getKeyStorePasswordPair(certificateFile, privateKeyFile)
-        val client = AWSIotMqttClient(clientEndpoint, clientId, pair.keyStore, pair.keyPassword)
-
-        client.connect()
-        println("connected")
+    init {
         client.publish("/", "hello world")
         println("published")
     }
+
+    fun publish(topic: String, msg: String) {
+        client.publish(topic, msg)
+    }
+
+    companion object {
+        private val random = Random()
+        private val client = connect()
+
+        fun connect() : AWSIotMqttClient {
+            val clientEndpoint = "a377sjyuqggau9-ats.iot.us-east-1.amazonaws.com"
+            val clientId = random.nextInt(1000000000).toString()
+            val certificateFile = "certificate.pem.crt"
+            val privateKeyFile = "private.pem.key"
+
+            val pair = SampleUtil.getKeyStorePasswordPair(certificateFile, privateKeyFile)
+            val client = AWSIotMqttClient(clientEndpoint, clientId, pair.keyStore, pair.keyPassword)
+
+            client.connect()
+            println("connected")
+
+            return client
+        }
+    }
+
+
+
+
 
 
 }
