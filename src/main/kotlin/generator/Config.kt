@@ -2,6 +2,7 @@ package generator
 
 import com.beust.klaxon.Json
 import kotlinx.coroutines.sync.Mutex
+import java.time.LocalDateTime
 
 data class Activity(
     @Json(name = "activity")
@@ -32,6 +33,8 @@ data class AccelSensorData(
 
 
 data class Measurement(
+    var uid: String = "not set",
+    var time: String = LocalDateTime.now().toString(),
     var temp: Double = 0.0,
     var pulse: Double = 0.0,
     var steps: Int = 0
