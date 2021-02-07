@@ -23,6 +23,9 @@ do AWS Topic. Dane te są przetwarzane za pomocą Lambdy i zapisywane do tabeli 
 ### 1. Generator
 Tutaj symulujemy opaskę. Przygotowane jest kilka “paczek” z parametrami odpowiadającymi np. treningowi, siedzeniu za biurkiem, spacerowi itp. Symulator losuje paczkę i czas do następnego losowania, następnie generuje losowe dane modulowane parametrami z paczki (np. trening - wyższe średnie tętno, siedzenie za biurkiem - niższe średnie tętno).
 
+Użyty algorytm do liczenia ktoków jest opisany w:
+["A More Reliable Step Counter using Built-in Accelerometer  in Smartphone"](https://www.researchgate.net/publication/329526966_A_More_Reliable_Step_Counter_using_Built-in_Accelerometer_in_Smartphone)
+
 ![generator](https://github.com/swawozny/test/blob/main/generator.png?raw=true)
 
 
@@ -30,6 +33,14 @@ Tutaj symulujemy opaskę. Przygotowane jest kilka “paczek” z parametrami odp
 
 #### 2.1 Wysyłanie danych do AWS IoT
 Dane z generatora są wysyłane za pomocą MQQT Client na AWS Topic "/smartband"
+
+Połączenie AWS używa klas z przykładu dołączonego do AWS SDK (w folderze java) Program wysyła pomiary do AWSu w formacie JSON z poniższymi parametrami:
+* uid (unique user id)
+* czas pomiaru (urządzenie jest połączone do internetu więc możemy założyć istnienie RTC)
+* kroki, liczone od zera w momencie uruchomienia urządzenia. Oprogramowanie po stronie AWS powinno wyliczać delty pomiędzy pomiarami.
+* puls
+* temperatura
+
 
 ```sh
 coroutineScope {

@@ -21,6 +21,10 @@ def get_for_day(day: str, measurements: List[dict]) -> List[dict]:
     return [m for m in measurements if day in str(m['time'])]
 
 
+def get_for_day_dt(day: str, measurements: List[dict]) -> List[dict]:
+    return get_for_day(str(day), measurements)
+
+
 def steps_made_by_minmax(measurements: List[dict]) -> int:
     steps = [int(m['steps']) for m in measurements]
     return max(steps) - min(steps)
@@ -89,20 +93,69 @@ def kcal(steps: int, weight_in_kg) -> float:
     return cal_per_step * steps
 
 
-def read_csv():
+def get_days(measurements: List[dict]) -> List[dt.datetime]:
+    datetimes = [str(m['time']) for m in measurements]
+    datetimes = [dt.datetime.strptime(t[:-3], "%Y-%m-%dT%H:%M:%S.%f").date() for t in datetimes]
+    datetimes = list(set(datetimes))  # keep unique entries
+    return datetimes
+
+
+def get_users(measurements: List[dict]) -> List[str]:
+    users = [str(m['uid']) for m in measurements]
+    users = list(set(users))
+    return users
+
+
+def single_user_single_day():
     measurements = open_csv()
     measurements = get_for_day("2021-02-02", measurements)
     measurements = get_for_user("user2", measurements)
-    for row in measurements:
-        print(row)
+    # for row in measurements:
+        # print(row)
 
-    print(steps_made_by_minmax(measurements))
-    print(kcal(steps_made_by_minmax(measurements), 70))
-    print('delta:' + str(steps_made_by_delta(measurements)))
+    print("steps by user in a day: " + str(steps_made_by_minmax(measurements)))
+    print('same, but calculated by delta: ' + str(steps_made_by_delta(measurements)))
+    print("kcal by user in a day: " + str(kcal(steps_made_by_delta(measurements), 70)))
 
     steps_chart(measurements, False, False)
     pulse_chart(measurements)
 
 
+def all_users_by_day():
+    measurements = open_csv()
+    days = get_days(measurements)
+    for day in days:
+        print(day)
+        all_users_for_day(day, measurements)
+
+
+def all_users_for_day(day, measurements):
+    measurements_for_day = get_for_day_dt(day, measurements)
+    users = get_users(measurements_for_day)
+    for user in users:
+        measurements_for_user = get_for_user(user, measurements_for_day)
+        steps = steps_made_by_delta(measurements_for_user)
+        print(user + ": " + str(steps) + " steps,   " + str(kcal(steps, 70)) + " kcal")
+
+
+def all_days_by_user():
+    measurements = open_csv()
+    users = get_users(measurements)
+    for user in users:
+        print(user)
+        all_days_for_user(measurements, user)
+
+
+def all_days_for_user(measurements, user):
+    measurements_for_user = get_for_user(user, measurements)
+    days = get_days(measurements_for_user)
+    for day in days:
+        measurements_for_day = get_for_day_dt(day, measurements_for_user)
+        steps = steps_made_by_delta(measurements_for_day)
+        print(str(day) + ": " + str(steps) + " steps,   " + str(kcal(steps, 70)) + " kcal")
+
+
 if __name__ == '__main__':
-    read_csv()
+    # single_user_single_day()
+    # all_users_by_day()
+    all_days_by_user()

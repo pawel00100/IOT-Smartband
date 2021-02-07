@@ -14,7 +14,6 @@ fun main() = runBlocking {
     var generatorJob: Job
     var printlnJob: Job
 
-//    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     measurement.uid = "user2"
 
@@ -27,7 +26,6 @@ fun main() = runBlocking {
                     println(measurement)
                     ConfigReader.saveMeasurement(measurement)
                     val msg = ConfigReader.serialize(measurement)
-//                    measurement.time = LocalDateTime.now(ZoneOffset.UTC).format(formatter)
                     measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
                     aws.publish("/smartband", msg)
                 }
