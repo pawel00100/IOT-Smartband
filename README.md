@@ -44,6 +44,18 @@ formacie JSON z poniższymi parametrami:
 * puls
 * temperatura
 
+```kotlin
+val publishJob: Job = launch {
+    loop(1000) {
+        measurement.mutex.withLock {
+            measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
+            GenConfigProvider.saveMeasurement(measurement)
+            val msg = GenConfigProvider.serialize(measurement)
+            aws.publish(topic, msg)
+        }
+    }
+}
+```
 Alarmy zawierają
 * uid
 * czas pomiaru
@@ -52,16 +64,13 @@ Alarmy zawierają
 * `"alarm"=true` - informacja o typie wiadomości
 
 ```kotlin
-val publishJob: Job = launch {
-        loop(1000) {
-            measurement.mutex.withLock {
-                measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
-                GenConfigProvider.saveMeasurement(measurement)
-                val msg = GenConfigProvider.serialize(measurement)
-                aws.publish(topic, msg)
-            }
-        }
-    }
+val alarmJob: Job = launch {
+    delay(2000)
+    val alarm = GenConfigProvider.alarmFromMeasurement(measurement)
+    val msg = GenConfigProvider.serialize(alarm)
+    aws.publish(topic, msg)
+    println("published alarm")
+}
 ```
 
 #### 2.2 Topic Rule
