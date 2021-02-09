@@ -28,6 +28,7 @@ Użyty algorytm do liczenia ktoków jest opisany w:
 
 ![generator](https://github.com/swawozny/test/blob/main/generator.png?raw=true)
 
+Generator potrafi też tworzyć alarmy. Symulują one naciśnięcie przycisku na opasce w trudnej sytuacji. 
 
 ### 2. AWS IoT (BackEnd)
 
@@ -41,6 +42,12 @@ Połączenie AWS używa klas z przykładu dołączonego do AWS SDK (w folderze j
 * puls
 * temperatura
 
+Alarmy zawierają
+* uid
+* czas pomiaru
+* puls
+* temperatura
+* "alarm"=true - informacja o typie wiadomości
 
 ```sh
 coroutineScope {
@@ -130,6 +137,17 @@ Efektem tego kodu jest powstanie takiego pliku na S3 Bucket:
 ![bucket](https://github.com/swawozny/test/blob/main/bucket.png?raw=true)
 
 Z tego pliku bezpośrednio korzystamy do generowania szczegółowych danych oraz wykresów w pythonie.
+
+#### 2.6 Powiadomienia o alarmach
+
+Osobną lambdą (zawartą w folderze lambdas/mail sender) są odbierane alarmy z topicu. Na podstawie alarmów są wysyłane maile informujące np. operatora o potrzebie pomocy użytkownikowi.
+
+Przykładowy mail:
+>Alarm send by user2 at 2021-02-09 17:12:15
+> 
+>Pulse: 87
+> 
+>Temperature: 32.57
 
 ### 3. Opracowanie danych w Pythonie
 

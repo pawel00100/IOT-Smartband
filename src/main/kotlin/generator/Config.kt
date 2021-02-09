@@ -42,3 +42,11 @@ data class Measurement(
     @Json(ignored = true)
     val mutex = Mutex()
 }
+
+data class Alarm(
+    var uid: String = "not set",
+    var time: String = LocalDateTime.now().toString(),
+    var temp: Double = 0.0,
+    var pulse: Double = 0.0,
+    val alarm: Boolean = true
+)
