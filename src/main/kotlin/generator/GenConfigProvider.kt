@@ -76,7 +76,15 @@ object GenConfigProvider {
         }
     }
 
+    fun alarmFromMeasurement(measurement: Measurement): Alarm {
+        return Alarm(uid =  measurement.uid,time = measurement.time, temp = measurement.temp, pulse = measurement.pulse)
+    }
+
     fun serialize(measurement: Measurement): String {
         return klaxon.toJsonString(measurement)
+    }
+
+    fun serialize(alarm: Alarm): String {
+        return klaxon.toJsonString(alarm)
     }
 }
