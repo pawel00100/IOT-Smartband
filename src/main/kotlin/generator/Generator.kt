@@ -7,6 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -15,7 +16,7 @@ import java.util.*
  * @param data list of activities containing parameters for sensors
  * @property measurement object containing generated values
  */
-class Generator(private val data: List<Activity>) {
+class Generator(private val genState: GenState, private val data: List<Activity>) {
     private var time: Long = 0
     private lateinit var activity: Activity
     private lateinit var pedometer: Pedometer
@@ -33,9 +34,15 @@ class Generator(private val data: List<Activity>) {
     }.toLong()
 
     private fun selectActivity(activityId: Int?) {
-        val id = activityId ?: Random().nextInt(data.size)
-        activity = data[id]
-        println(activity.name)
+        activity = if (LocalDateTime.now().hour in 5..23) {
+            val id = activityId ?: Random().nextInt(data.size - 1)
+            data.filterNot { it.name == genState.lastActivityName }[id]
+        } else {
+            data.first { it.name == "lying" }
+        }
+
+        if (genState.checkOvulation()) activity.temp += ovulationTemp
+        if (Random().nextInt(1000) == 999) activity.pulse = cardiacArrest
 
         pedometer = Pedometer(
             measurement,
@@ -43,6 +50,8 @@ class Generator(private val data: List<Activity>) {
         )
 
         time = activityTime(activity.name)
+        genState.lastActivityName = activity.name
+        GenConfigProvider.saveGenState(genState)
     }
 
     /**
