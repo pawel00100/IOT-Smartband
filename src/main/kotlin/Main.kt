@@ -37,9 +37,9 @@ fun main() = runBlocking {
     val publishJob: Job = launch {
         loop(1000) {
             measurement.mutex.withLock {
+                measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
                 GenConfigProvider.saveMeasurement(measurement)
                 val msg = GenConfigProvider.serialize(measurement)
-                measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
                 aws.publish(topic, msg)
             }
         }

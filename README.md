@@ -21,9 +21,10 @@ do AWS Topic. Dane te są przetwarzane za pomocą Lambdy i zapisywane do tabeli 
 
 # Szczegółowy opis
 ### 1. Generator
-Tutaj symulujemy opaskę. Przygotowane jest kilka “paczek” z parametrami odpowiadającymi np. treningowi, siedzeniu za biurkiem, spacerowi itp. Symulator losuje paczkę i czas do następnego losowania, następnie generuje losowe dane modulowane parametrami z paczki (np. trening - wyższe średnie tętno, siedzenie za biurkiem - niższe średnie tętno).
+Tutaj symulujemy opaskę. Przygotowane jest kilka „paczek” z parametrami odpowiadającymi np. treningowi, siedzeniu za 
+biurkiem, spacerowi itp. Symulator losuje paczkę i czas do następnego losowania, następnie generuje losowe dane modulowane parametrami z paczki (np. trening - wyższe średnie tętno, siedzenie za biurkiem - niższe średnie tętno).
 
-Użyty algorytm do liczenia ktoków jest opisany w:
+Użyty algorytm do liczenia kroków jest opisany w:
 ["A More Reliable Step Counter using Built-in Accelerometer  in Smartphone"](https://www.researchgate.net/publication/329526966_A_More_Reliable_Step_Counter_using_Built-in_Accelerometer_in_Smartphone)
 
 ![generator](https://github.com/swawozny/test/blob/main/generator.png?raw=true)
@@ -33,9 +34,10 @@ Generator potrafi też tworzyć alarmy. Symulują one naciśnięcie przycisku na
 ### 2. AWS IoT (BackEnd)
 
 #### 2.1 Wysyłanie danych do AWS IoT
-Dane z generatora są wysyłane za pomocą MQQT Client na AWS Topic "/smartband"
+Dane z generatora są wysyłane za pomocą MQQT Client na AWS Topic `"/smartband"`
 
-Połączenie AWS używa klas z przykładu dołączonego do AWS SDK (w folderze java) Program wysyła pomiary do AWSu w formacie JSON z poniższymi parametrami:
+Połączenie AWS używa klas z przykładu dołączonego do AWS SDK (w folderze java). Program wysyła pomiary do AWS-u w 
+formacie JSON z poniższymi parametrami:
 * uid (unique user id)
 * czas pomiaru (urządzenie jest połączone do internetu więc możemy założyć istnienie RTC)
 * kroki, liczone od zera w momencie uruchomienia urządzenia. Oprogramowanie po stronie AWS powinno wyliczać delty pomiędzy pomiarami.
@@ -47,23 +49,19 @@ Alarmy zawierają
 * czas pomiaru
 * puls
 * temperatura
-* "alarm"=true - informacja o typie wiadomości
+* `"alarm"=true` - informacja o typie wiadomości
 
-```sh
-coroutineScope {
-        generatorJob = launch { generator.start() }
-        printlnJob = launch {
-            while (true) {
-                delay(1000)
-                measurement.mutex.withLock {
-                    println(measurement)
-                    ConfigReader.saveMeasurement(measurement)
-                    val msg = ConfigReader.serialize(measurement)
-                    measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
-                    aws.publish("/smartband", msg)
-                }
+```kotlin
+val publishJob: Job = launch {
+        loop(1000) {
+            measurement.mutex.withLock {
+                measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
+                GenConfigProvider.saveMeasurement(measurement)
+                val msg = GenConfigProvider.serialize(measurement)
+                aws.publish(topic, msg)
             }
         }
+    }
 ```
 
 #### 2.2 Topic Rule
@@ -74,7 +72,7 @@ Ustawiono Topic Rule, tak aby dane, które są wysyłane z generatora na topic "
 #### 2.3 Lambda Function
 W Lambda Function dane są przetwarzane i zapisywane do tabeli w DynamoDB za pomocą funkcji poniżej:
 
-```sh
+```python
 import boto3
 import csv
 
@@ -99,7 +97,7 @@ Utworzono także kolejną lambda function jako destination wcześniej utworzonej
 ![awslambda](https://github.com/swawozny/test/blob/main/awslambda.png?raw=true)
 
 Kod przetwarzający dane z tabeli dynamoDB do pliku csv na S3 Bucket:
-```sh
+```python
 def lambda_handler(event, context):
 
     with open(TEMP_FILENAME, 'w') as output_file:
@@ -152,7 +150,7 @@ Przykładowy mail:
 ### 3. Opracowanie danych w Pythonie
 
 Pobieramy dane z S3 Bucket za pomocą funkcji i przekształcamy je do listy słownikowej.
-```sh
+```python
 def open_csv() -> List[dict]:
     url = 'URL_TO_CSV_FILE_ON_S3_BUCKET'
     r = requests.get(url, allow_redirects=True)
@@ -164,7 +162,7 @@ def open_csv() -> List[dict]:
 
 Dane przetwarzamy i wyciągamy te aktualne i dla konkretnego użytkownika:
 
-```sh
+```python
 def read_csv():
     measurements = open_csv()
     measurements = get_for_day('2021-02-09', measurements)
@@ -185,7 +183,7 @@ Na ich podstawie generujemy między innymi:
 - Liczba spalonych kcal
 - Liczba kroków
 
-[author1]: <>
+[author1]: <https://github.com/Latropos>
 [author2]: <https://github.com/PKopel>
 [author3]: <https://github.com/pawel00100>
 [author4]: <https://github.com/swawozny>
