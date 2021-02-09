@@ -5,7 +5,11 @@ import matplotlib.pyplot as plt
 
 
 def open_csv() -> List[dict]:
-    file = open('aa.csv', 'r')
+    url = 'https://testdataa.s3.amazonaws.com/smartdata.csv'
+    r = requests.get(url, allow_redirects=True)
+
+    open('data.csv', 'wb').write(r.content)
+    file = open('data.csv', 'r')
     return list(csv.DictReader(file))
 
 
