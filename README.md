@@ -185,6 +185,25 @@ Na ich podstawie generujemy między innymi:
 - Liczba spalonych kcal
 - Liczba kroków
 
+
+#### 3.1 API REST
+Stworzyliśmy API restowe wystawiające endpointy dla opracowanych danych
+
+| endpoint                  | opis                   |
+|:--------------------------|:------------------------------|
+| `/all`              |wszystkie pomiary       |
+| `/single_user_single_day/raw/{date}/{user}`        |wszystkie pomiary użytkownika w dany dzień                               |
+| `/single_user_single_day/{date}/{user}`         |opracowane dane użytkownika w dany dzień                          |
+| `/all_users_by_day`         |opracowane dane wszystkich użytkowników pogrupowane dniami                              |
+| `/all_users_for_day/{day}`         |opracowane dane wszystkich użytkowników w dany dzień                                 |
+| `/all_days_by_user`         |opracowane dane wszystkich dni pogrupowane użytkownikami                               |
+| `/all_days_for_user/{user}`         |opracowane dane wszystkich dni danego użytkownika                                 |
+
+opracowane dane zawierają:
+- dzień, użytkownik lub brak (w zależności od endpointu, nie zwraca się danych podanych w zapytaniu i tworzących grupę)
+- liczbę kroków
+- liczbę spalonych kalorii
+
 [author1]: <>
 [author2]: <https://github.com/PKopel>
 [author3]: <https://github.com/pawel00100>
