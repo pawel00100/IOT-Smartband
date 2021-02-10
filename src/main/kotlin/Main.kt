@@ -4,8 +4,6 @@ import generator.Generator
 import generator.delayLoop
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 object Main {
     private val aws = AWS()
@@ -37,7 +35,6 @@ object Main {
 
     private suspend fun publish() = delayLoop(5000, { input != "stop" }) {
         measurement.mutex.withLock {
-            measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
             GenConfigProvider.saveMeasurement(measurement)
             val msg = GenConfigProvider.serialize(measurement)
             aws.publish(topic, msg)

@@ -4,6 +4,7 @@ import com.beust.klaxon.Json
 import kotlinx.coroutines.sync.Mutex
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import kotlin.random.Random
 
@@ -56,7 +57,13 @@ data class Measurement(
     var steps: Int = 0
 ) {
     @Json(ignored = true)
-    val mutex = Mutex()
+    private val _mutex = Mutex()
+    @Json(ignored = true)
+    val mutex: Mutex
+        get() {
+            time = LocalDateTime.now(ZoneOffset.UTC).toString()
+            return _mutex
+        }
 }
 
 data class Alarm(
