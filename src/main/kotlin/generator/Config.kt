@@ -8,19 +8,6 @@ import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import kotlin.random.Random
 
-data class GenState(
-    var lastActivityName: String = "",
-    private var lastOvulationDate: LocalDate = LocalDate.now(),
-    private val sex: String = if (Random.Default.nextBoolean()) "male" else "female"
-) {
-    fun checkOvulation(): Boolean =
-        if (sex == "female" && ChronoUnit.DAYS.between(lastOvulationDate, LocalDate.now()) == 28L) {
-            lastOvulationDate = LocalDate.now()
-            true
-        } else false
-
-}
-
 data class Activity(
     @Json(name = "activity")
     val name: String,
@@ -56,7 +43,6 @@ data class Measurement(
     var pulse: Double = 0.0,
     var steps: Int = 0
 ) {
-    @Json(ignored = true)
     private val _mutex = Mutex()
     @Json(ignored = true)
     val mutex: Mutex

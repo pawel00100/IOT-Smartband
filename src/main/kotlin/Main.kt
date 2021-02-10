@@ -1,5 +1,4 @@
 import generator.GenConfigProvider
-import generator.GenState
 import generator.Generator
 import generator.delayLoop
 import kotlinx.coroutines.*
@@ -10,10 +9,25 @@ object Main {
 
     private const val topic = "/smartband"
     private val humanData = GenConfigProvider.getHumanData()
-    private val genState = GenConfigProvider.getGenState() ?: GenState()
-    private val generator = Generator(genState, humanData!!)
+    private val genState = GenConfigProvider.getGenState()
+    private val generator = Generator(genState, humanData)
     private val measurement = generator.measurement.apply { uid = "user2" }
     private var input = ""
+
+    private val stateString =
+        """
+        activity: ${genState.lastActivityName}
+        sex: ${genState.sex}
+        """.trimIndent()
+
+    private val helpString =
+        """
+        alarm - send alarm
+        save - save measurement to .json
+        display - show measurements each 2 s
+        stop - stop display
+        state -  show generator state
+        """.trimIndent()
 
     private fun alarm() {
         val alarm = GenConfigProvider.alarmFromMeasurement(measurement)
@@ -22,18 +36,13 @@ object Main {
         println("published alarm")
     }
 
-    private fun save() {
-        GenConfigProvider.saveMeasurement(measurement)
-    }
-
     private suspend fun display() = delayLoop(2000, { input != "stop" }) {
         measurement.mutex.withLock {
-            println(measurement)
+            print("$measurement\n> ")
         }
-        print("> ")
     }
 
-    private suspend fun publish() = delayLoop(5000, { input != "stop" }) {
+    private suspend fun publish() = delayLoop(5000) {
         measurement.mutex.withLock {
             GenConfigProvider.saveMeasurement(measurement)
             val msg = GenConfigProvider.serialize(measurement)
@@ -45,16 +54,16 @@ object Main {
     fun main(args: Array<String>) = runBlocking {
 
         val generatorJob: Job = launch { generator.start() }
-        var saveJob: Job? = null
-        var publishJob: Job? = null
+        val publishJob: Job = launch { publish() }
         var displayJob: Job? = null
 
         while (input != "exit") {
             when (input) {
                 "alarm" -> alarm()
-                "save" -> saveJob = launch { save() }
-                "publish" -> publishJob = launch { publish() }
+                "save" -> GenConfigProvider.saveMeasurement(measurement)
                 "display" -> displayJob = launch { display() }
+                "state" -> println(stateString)
+                "help" -> println(helpString)
             }
 
             withContext(Dispatchers.IO) {
@@ -64,8 +73,7 @@ object Main {
         }
 
         displayJob?.cancelAndJoin()
-        saveJob?.cancelAndJoin()
-        publishJob?.cancelAndJoin()
+        publishJob.cancelAndJoin()
         generatorJob.cancelAndJoin()
 
         println("Done")

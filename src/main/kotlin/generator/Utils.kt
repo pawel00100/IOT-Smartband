@@ -6,8 +6,8 @@ val ovulationTemp = SensorData(frequency = 100.0, mean = 0.5, std = 0.05)
 
 suspend fun delayLoop(delay: Long, condition: () -> Boolean = { true }, func: (suspend () -> Unit)) {
     while (condition()) {
-        kotlinx.coroutines.delay(delay)
         func()
+        kotlinx.coroutines.delay(delay)
     }
 }
 

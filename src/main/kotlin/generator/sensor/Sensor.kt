@@ -1,6 +1,6 @@
 package generator.sensor
 
-import kotlinx.coroutines.delay
+import generator.delayLoop
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -10,17 +10,9 @@ class Sensor(
     private val mutex: Mutex
 ) : ISensor by gen {
 
-    private suspend fun takeMeasurement() {
-        val measurement = generateValue()
-
+    suspend fun start() = delayLoop((1000.0 / frequency).toLong()) {
         mutex.withLock {
-            setter(measurement)
+            setter(generateValue())
         }
-
-        delay((1000.0 / frequency).toLong())
-    }
-
-    suspend fun start() {
-        while (true) takeMeasurement()
     }
 }
