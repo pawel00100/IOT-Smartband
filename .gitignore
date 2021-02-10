@@ -27,6 +27,9 @@ measurement.json
 gen_state.json
 connect_device_package/*
 
+certificate.pem.crt
+private.pem.key
+
 .idea/*
 .gradle/*
 build/*

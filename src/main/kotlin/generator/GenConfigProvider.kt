@@ -31,23 +31,25 @@ object GenConfigProvider {
      * Tries to read list of [Activity] objects from .json file
      * @param id index of config file to load, default random
      */
-    fun getHumanData(id: Int = Random.Default.nextInt(2)): List<Activity>? {
+    fun getHumanData(id: Int = Random.Default.nextInt(2)): List<Activity> {
         val resource = "$CONFIG_PATH/${drawConfigFile(id)}"
         val configFile = try {
             javaClass.getResource(resource).readText(Charsets.UTF_8)
         } catch (all: Exception) {
             throw RuntimeException("Failed to load resource=$resource!", all)
         }
-        return klaxon.parseArray(configFile)
+        return klaxon.parseArray(configFile) ?: emptyList()
     }
 
-    fun getGenState(): GenState? {
+    fun getGenState(): GenState {
         val configFile = try {
-            javaClass.getResource(GEN_STATE_PATH).readText(Charsets.UTF_8)
+            File(GEN_STATE_PATH).readText(Charsets.UTF_8)
         } catch (all: Exception) {
-            return null
+            return GenState()
         }
-        return klaxon.parse<GenState>(configFile)
+        return klaxon
+            .fieldConverter(KlaxonDate::class, dateConverter)
+            .parse(configFile) ?: GenState()
     }
 
     /**
@@ -77,7 +79,7 @@ object GenConfigProvider {
     }
 
     fun alarmFromMeasurement(measurement: Measurement): Alarm {
-        return Alarm(uid =  measurement.uid,time = measurement.time, temp = measurement.temp, pulse = measurement.pulse)
+        return Alarm(uid = measurement.uid, time = measurement.time, temp = measurement.temp, pulse = measurement.pulse)
     }
 
     fun serialize(measurement: Measurement): String {

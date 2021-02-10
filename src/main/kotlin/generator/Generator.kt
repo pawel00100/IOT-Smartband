@@ -41,7 +41,7 @@ class Generator(private val genState: GenState, private val data: List<Activity>
             data.first { it.name == "lying" }
         }
 
-        if (genState.checkOvulation()) activity.temp += ovulationTemp
+        if (genState.isOvulating()) activity.temp += ovulationTemp
         if (Random().nextInt(1000) == 999) activity.pulse = cardiacArrest
 
         pedometer = Pedometer(
@@ -60,7 +60,7 @@ class Generator(private val genState: GenState, private val data: List<Activity>
      * @param activityId optional index of activity to chose
      */
     suspend fun start(activityId: Int? = null) {
-        println("starting generator")
+        println("Starting generator")
         val mutex = measurement.mutex
         while (true) {
             selectActivity(activityId)
