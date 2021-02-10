@@ -32,5 +32,9 @@ compileTestKotlin {
 }
 
 application {
-    mainClassName = 'MainKt'
+    mainClassName = 'Main'
+}
+
+run {
+    standardInput = System.in
 }
