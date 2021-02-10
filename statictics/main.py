@@ -26,6 +26,113 @@ def get_for_day_dt(day: str, measurements: List[dict]) -> List[dict]:
     return get_for_day(str(day), measurements)
 
 
+def get_days(measurements: List[dict]) -> List[str]:
+    valid_days = [str(m['__dt']) for m in measurements]
+    valid_days = [t[0:10] for t in valid_days]
+    my_set = set(valid_days)
+    return sorted(list(my_set))
+
+
+def is_next_day(day1: str, day2: str) -> bool:
+    day1 = dt.datetime.strptime(day1, "%Y-%m-%d")
+    day2 = dt.datetime.strptime(day2, "%Y-%m-%d")
+    if day1 + dt.timedelta(days=1) != day2:
+        return True
+    return False
+
+
+def get_day_diff(day1: str, day2: str) -> int:
+    day1 = dt.datetime.strptime(day1, "%Y-%m-%d")
+    day2 = dt.datetime.strptime(day2, "%Y-%m-%d")
+    return (day2 - day1).days
+
+
+def avg_temp_day(day: str, measurements: List[dict]) -> float:
+    data = get_for_day(day, measurements)
+    total_sum = 0
+    counter = 0
+    
+    for row in data:
+        total_sum += float(row['temp'])
+        counter += 1
+    
+    return total_sum / counter
+
+
+def avg_temp(measurements: List[dict]) -> dict:
+    user_data = measurements
+    temp_dict = {}
+    
+    prev_day = get_days(measurements)[0]
+    str_prev_day = str(prev_day)[0:10]
+    temp_dict[str_prev_day] = avg_temp_day(str_prev_day, user_data)
+    
+    for day in [day for day in get_days(measurements)[1:]]:
+        
+        str_day = str(day)[0:10]
+        while prev_day + dt.timedelta(days=1) != day:
+            temp_dict[str(prev_day + dt.timedelta(days=1))[0:10]] = 0
+            prev_day = prev_day + dt.timedelta(days=1)
+        
+        temp_dict[str_day] = avg_temp_day(str_day, user_data)
+        prev_day = day
+    
+    return temp_dict
+
+
+def estimate_cycle_duration(o_days: List[str]) -> None:
+    p_day = o_days[0]
+    cycles_lengths = []
+    
+    for day in o_days:
+        if (get_day_diff(p_day, day)) < 7:
+            pass
+        else:
+            cycles_lengths.append(get_day_diff(p_day, day))
+        p_day = day
+    
+    if len(cycles_lengths) > 0:
+        cycle_len = sum(cycles_lengths) / len(cycles_lengths)
+    else:
+        cycle_len = 0
+    if 20 < cycle_len < 50:
+        print("Estimated average cycle lasts " + str(cycle_len) + " days")
+    else:
+        print("Unable to estimate cycle duration")
+
+
+def temp_chart(measurements: List[dict]):
+    data = avg_temp(measurements)
+    fever = 35
+    print(data)
+    
+    if len(data) < 2:
+        return
+    
+    names = [str(day)[0:10] for day in list(data.keys())]
+    
+    values = list(data.values())
+    # fever does not count in
+    values_relevant = [v for v in values if fever > v > 0]
+    fig, axs = plt.subplots(1, 1, figsize=(7, 6))
+    plt.ylim(min(values_relevant) - .75, max(values) + .5)
+    
+    t_mean = sum(values_relevant) / len(values_relevant)
+    # estimated ovulation BBT temp rise
+    o_temp_rise = max((max(values_relevant) - t_mean) / 2, 0.35)
+    
+    clrs = ['#d66738' if x > fever else '#3ca657' if (x > t_mean + o_temp_rise) else '#95bfa0' if (
+                x > t_mean + o_temp_rise / 2) else 'gray' for x in values]
+    o_days = [names[x] for x in range(0, len(values)) if 30 > values[x] > t_mean + o_temp_rise / 2]
+    if len(o_days) > 1:
+        estimate_cycle_duration(o_days)
+    
+    plt.bar(names, values, color=clrs)
+    fig.suptitle('Average temperature')
+    plt.xticks(rotation='vertical')
+    plt.show()
+
+
 def sorted_mes(measurements: List[dict]) -> List[dict]:
     sorted_ = list(measurements)
     sorted_.sort(key=lambda s: s["time"])
@@ -132,8 +239,10 @@ def single_user_single_day_charts(day: str, user: str):
     print('same, but calculated by delta: ' + str(data["steps"]))
     print("kcal by user in a day: " + str(round(data["kcal"], 2)))
 
-    steps_chart(measurements, False, False)
-    pulse_chart(measurements)
+    # steps_chart(measurements, False, False)
+    # pulse_chart(measurements)
+
+    temp_chart(measurements)
 
 
 def all_users_by_day():
@@ -179,6 +288,7 @@ def all_days_for_user(user, measurements=open_csv()):
 
 
 if __name__ == '__main__':
+
     single_user_single_day_charts("2021-02-09", "user2")
     # all_users_by_day()
     # all_days_by_user()
