@@ -4,8 +4,8 @@ val cardiacArrest = SensorData(frequency = 0.1, mean = 70.0, std = 50.0)
 
 val ovulationTemp = SensorData(frequency = 100.0, mean = 0.5, std = 0.05)
 
-suspend fun loop(delay: Long, func: (suspend () -> Unit)) {
-    while (true) {
+suspend fun delayLoop(delay: Long, condition: () -> Boolean = { true }, func: (suspend () -> Unit)) {
+    while (condition()) {
         kotlinx.coroutines.delay(delay)
         func()
     }

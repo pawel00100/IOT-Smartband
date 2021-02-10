@@ -60,7 +60,7 @@ class Generator(private val genState: GenState, private val data: List<Activity>
      * @param activityId optional index of activity to chose
      */
     suspend fun start(activityId: Int? = null) {
-        println("starting generator")
+        println("Starting generator")
         val mutex = measurement.mutex
         while (true) {
             selectActivity(activityId)

@@ -45,14 +45,12 @@ formacie JSON z poniższymi parametrami:
 * temperatura
 
 ```kotlin
-val publishJob: Job = launch {
-    loop(1000) {
-        measurement.mutex.withLock {
-            measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
-            GenConfigProvider.saveMeasurement(measurement)
-            val msg = GenConfigProvider.serialize(measurement)
-            aws.publish(topic, msg)
-        }
+private suspend fun publish() = delayLoop(5000, { input != "stop" }) {
+    measurement.mutex.withLock {
+        measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
+        GenConfigProvider.saveMeasurement(measurement)
+        val msg = GenConfigProvider.serialize(measurement)
+        aws.publish(topic, msg)
     }
 }
 ```
@@ -64,8 +62,7 @@ Alarmy zawierają
 * `"alarm"=true` - informacja o typie wiadomości
 
 ```kotlin
-val alarmJob: Job = launch {
-    delay(2000)
+private fun alarm() {
     val alarm = GenConfigProvider.alarmFromMeasurement(measurement)
     val msg = GenConfigProvider.serialize(alarm)
     aws.publish(topic, msg)

@@ -1,55 +1,76 @@
 import generator.GenConfigProvider
 import generator.GenState
 import generator.Generator
-import generator.loop
+import generator.delayLoop
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-fun main() = runBlocking {
-    val aws = AWS()
+object Main {
+    private val aws = AWS()
 
-    val topic = "/smartband"
-    val humanData = GenConfigProvider.getHumanData()
-    val genState = GenConfigProvider.getGenState() ?: GenState()
-    val generator = Generator(genState, humanData!!)
-    val measurement = generator.measurement
+    private const val topic = "/smartband"
+    private val humanData = GenConfigProvider.getHumanData()
+    private val genState = GenConfigProvider.getGenState() ?: GenState()
+    private val generator = Generator(genState, humanData!!)
+    private val measurement = generator.measurement.apply { uid = "user2" }
+    private var input = ""
 
-
-    measurement.uid = "user2"
-
-    val generatorJob: Job = launch { generator.start() }
-    val alarmJob: Job = launch {
-        delay(2000)
+    private fun alarm() {
         val alarm = GenConfigProvider.alarmFromMeasurement(measurement)
         val msg = GenConfigProvider.serialize(alarm)
         aws.publish(topic, msg)
         println("published alarm")
     }
-    val printlnJob: Job = launch {
-        loop(1000) {
-            measurement.mutex.withLock {
-                println(measurement)
-            }
-        }
+
+    private fun save() {
+        GenConfigProvider.saveMeasurement(measurement)
     }
-    val publishJob: Job = launch {
-        loop(1000) {
-            measurement.mutex.withLock {
-                measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
-                GenConfigProvider.saveMeasurement(measurement)
-                val msg = GenConfigProvider.serialize(measurement)
-                aws.publish(topic, msg)
-            }
+
+    private suspend fun display() = delayLoop(2000, { input != "stop" }) {
+        measurement.mutex.withLock {
+            println(measurement)
+        }
+        print("> ")
+    }
+
+    private suspend fun publish() = delayLoop(5000, { input != "stop" }) {
+        measurement.mutex.withLock {
+            measurement.time = LocalDateTime.now(ZoneOffset.UTC).toString()
+            GenConfigProvider.saveMeasurement(measurement)
+            val msg = GenConfigProvider.serialize(measurement)
+            aws.publish(topic, msg)
         }
     }
 
-    delay(30000)
-    alarmJob.cancelAndJoin()
-    printlnJob.cancelAndJoin()
-    publishJob.cancelAndJoin()
-    generatorJob.cancelAndJoin()
+    @JvmStatic
+    fun main(args: Array<String>) = runBlocking {
 
-    println("Done")
+        val generatorJob: Job = launch { generator.start() }
+        var saveJob: Job? = null
+        var publishJob: Job? = null
+        var displayJob: Job? = null
+
+        while (input != "exit") {
+            when (input) {
+                "alarm" -> alarm()
+                "save" -> saveJob = launch { save() }
+                "publish" -> publishJob = launch { publish() }
+                "display" -> displayJob = launch { display() }
+            }
+
+            withContext(Dispatchers.IO) {
+                print("> ")
+                input = readLine() ?: ""
+            }
+        }
+
+        displayJob?.cancelAndJoin()
+        saveJob?.cancelAndJoin()
+        publishJob?.cancelAndJoin()
+        generatorJob.cancelAndJoin()
+
+        println("Done")
+    }
 }

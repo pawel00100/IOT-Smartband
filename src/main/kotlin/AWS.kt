@@ -3,11 +3,6 @@ import sampleUtil.SampleUtil
 import java.util.*
 
 class AWS {
-    init {
-        client.publish("/", "hello world")
-        println("published")
-    }
-
     fun publish(topic: String, msg: String) {
         client.publish(topic, msg)
     }
@@ -16,7 +11,7 @@ class AWS {
         private val random = Random()
         private val client = connect()
 
-        fun connect() : AWSIotMqttClient {
+        private fun connect() : AWSIotMqttClient {
             val clientEndpoint = "a377sjyuqggau9-ats.iot.us-east-1.amazonaws.com"
             val clientId = random.nextInt(1000000000).toString()
             val certificateFile = "certificate.pem.crt"
@@ -31,10 +26,4 @@ class AWS {
             return client
         }
     }
-
-
-
-
-
-
 }
