@@ -21,19 +21,43 @@ do AWS Topic. Dane te są przetwarzane za pomocą Lambdy i zapisywane do tabeli 
 
 # Szczegółowy opis
 ### 1. Generator
+
+#### 1.1 Generowanie danych
 Tutaj symulujemy opaskę. Przygotowane jest kilka „paczek” z parametrami odpowiadającymi np. treningowi, siedzeniu za 
 biurkiem, spacerowi itp. Symulator losuje paczkę i czas do następnego losowania, następnie generuje losowe dane modulowane parametrami z paczki (np. trening - wyższe średnie tętno, siedzenie za biurkiem - niższe średnie tętno).
 
 Użyty algorytm do liczenia kroków jest opisany w:
 ["A More Reliable Step Counter using Built-in Accelerometer  in Smartphone"](https://www.researchgate.net/publication/329526966_A_More_Reliable_Step_Counter_using_Built-in_Accelerometer_in_Smartphone)
 
-![generator](https://github.com/swawozny/test/blob/main/generator.png?raw=true)
 
-Generator potrafi też tworzyć alarmy. Symulują one naciśnięcie przycisku na opasce w trudnej sytuacji. 
+Generator potrafi też tworzyć alarmy. Symulują one naciśnięcie przycisku na opasce w trudnej sytuacji.
 
-### 2. AWS IoT (BackEnd)
+Przykładowe użycie generatora:
 
-#### 2.1 Wysyłanie danych do AWS IoT
+```
+[user@host] $ ./gradlew run --console=plain
+...
+Starting generator
+> state
+activity: walking
+sex: female
+> display
+> Measurement(uid=user2, time=2021-02-10T22:09:53.891657, temp=30.59574963431126, pulse=68.29102777760463, steps=0)
+> Measurement(uid=user2, time=2021-02-10T22:09:55.892072, temp=31.979125339233804, pulse=68.29102777760463, steps=0)
+> Measurement(uid=user2, time=2021-02-10T22:09:57.892483, temp=31.983099196585847, pulse=65.6949898861198, steps=1)
+> Measurement(uid=user2, time=2021-02-10T22:09:59.892870, temp=31.44123789025402, pulse=65.6949898861198, steps=1) 
+> Measurement(uid=user2, time=2021-02-10T22:10:01.893272, temp=31.720433496139083, pulse=65.6949898861198, steps=1)
+> Measurement(uid=user2, time=2021-02-10T22:10:03.893635, temp=31.13546903824449, pulse=65.6949898861198, steps=1)
+> stop
+> alarm
+published alarm
+> exit
+Done
+...
+```
+
+
+#### 1.2 Wysyłanie danych do AWS IoT
 Dane z generatora są wysyłane za pomocą MQQT Client na AWS Topic `"/smartband"`
 
 Połączenie AWS używa klas z przykładu dołączonego do AWS SDK (w folderze java). Program wysyła pomiary do AWS-u w 
@@ -70,12 +94,14 @@ private fun alarm() {
 }
 ```
 
-#### 2.2 Topic Rule
+### 2. AWS IoT (BackEnd)
+
+#### 2.1 Topic Rule
 Ustawiono Topic Rule, tak aby dane, które są wysyłane z generatora na topic "/smartband" były triggerem dla Lambda function.
 
 ![generator](https://github.com/swawozny/test/blob/main/topicrule.png?raw=true)
 
-#### 2.3 Lambda Function
+#### 2.2 Lambda Function
 W Lambda Function dane są przetwarzane i zapisywane do tabeli w DynamoDB za pomocą funkcji poniżej:
 
 ```python
@@ -97,7 +123,7 @@ def lambda_handler(event, context):
     return 0
 ```
 
-#### 2.4 Destination Lambda Function
+#### 2.3 Destination Lambda Function
 
 Utworzono także kolejną lambda function jako destination wcześniej utworzonej. Zadaniem nowej lambdy jest przetwarzanie danych z tabeli dynamoDB do pliku csv, który jest umieszczany na S3 bucket.
 ![awslambda](https://github.com/swawozny/test/blob/main/awslambda.png?raw=true)
@@ -135,14 +161,14 @@ def lambda_handler(event, context):
     s3_resource.Bucket(OUTPUT_BUCKET).upload_file(TEMP_FILENAME, OUTPUT_KEY)
 ```
 
-#### 2.5 S3 Bucket
+#### 2.4 S3 Bucket
 
 Efektem tego kodu jest powstanie takiego pliku na S3 Bucket:
 ![bucket](https://github.com/swawozny/test/blob/main/bucket.png?raw=true)
 
 Z tego pliku bezpośrednio korzystamy do generowania szczegółowych danych oraz wykresów w pythonie.
 
-#### 2.6 Powiadomienia o alarmach
+#### 2.5 Powiadomienia o alarmach
 
 Osobną lambdą (zawartą w folderze lambdas/mail sender) są odbierane alarmy z topicu. Na podstawie alarmów są wysyłane maile informujące np. operatora o potrzebie pomocy użytkownikowi.
 
