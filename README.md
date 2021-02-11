@@ -8,8 +8,8 @@
 - [Sebastian Wąwoźny][author4]
 
 # Opis
-Projekt za pomocą generatora, symulującego inteligentną opaskę, wysyła dane przy użyciu MQQT
-do AWS Topic. Dane te są przetwarzane za pomocą Lambdy i zapisywane do tabeli w DynamoDB. Ponadto w przypadku niepokojących danych(ryzyko śmierci itp.) wysyłane są ostrzeżenia na e-mail za pomocą AWS SNS. Następnie kolejna lambda na podstawie aktualnych danych w tabeli dynamoDB tworzy plik csv ze wszystkimi danymi i umieszcza go to S3 Bucket. Plik ten jest wykorzystywany do generowania danych oraz wykresów za pomocą Pythona.
+Projekt za pomocą generatora, symulującego inteligentną opaskę, wysyła dane przy użyciu MQTT
+do AWS Topic. Dane te są przetwarzane za pomocą Lambdy i zapisywane do tabeli w DynamoDB. Ponadto w przypadku niepokojących danych(ryzyko śmierci itp.) wysyłane są ostrzeżenia na określony e-mail. Następnie kolejna lambda na podstawie aktualnych danych w tabeli dynamoDB tworzy plik csv ze wszystkimi danymi i umieszcza go na S3 Bucket. Plik ten jest wykorzystywany do generowania danych oraz wykresów za pomocą Pythona.
 
 # Stack technologiczny
 
@@ -58,7 +58,7 @@ Done
 
 
 #### 1.2 Wysyłanie danych do AWS IoT
-Dane z generatora są wysyłane za pomocą MQQT Client na AWS Topic `"/smartband"`
+Dane z generatora są wysyłane za pomocą MQTT Client na AWS Topic `"/smartband"`
 
 Połączenie AWS używa klas z przykładu dołączonego do AWS SDK (w folderze java). Program wysyła pomiary do AWS-u w 
 formacie JSON z poniższymi parametrami:
