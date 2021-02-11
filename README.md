@@ -26,6 +26,11 @@ do AWS Topic. Dane te są przetwarzane za pomocą Lambdy i zapisywane do tabeli 
 Tutaj symulujemy opaskę. Przygotowane jest kilka „paczek” z parametrami odpowiadającymi np. treningowi, siedzeniu za 
 biurkiem, spacerowi itp. Symulator losuje paczkę i czas do następnego losowania, następnie generuje losowe dane modulowane parametrami z paczki (np. trening - wyższe średnie tętno, siedzenie za biurkiem - niższe średnie tętno).
 
+Paczki danych z urządzeń pomiarowych zostały stworzone na podstawie **rzeczywistych** urządzeń tego typu:
+* smarthpone Google Nexus 5/5x
+* smartphone Samsung Galaxy S5
+* smartwatch LG G Watch
+
 Użyty algorytm do liczenia kroków jest opisany w:
 ["A More Reliable Step Counter using Built-in Accelerometer  in Smartphone"](https://www.researchgate.net/publication/329526966_A_More_Reliable_Step_Counter_using_Built-in_Accelerometer_in_Smartphone)
 
